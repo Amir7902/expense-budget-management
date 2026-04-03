@@ -25,3 +25,27 @@ Java • Spring Boot • Hibernate/JPA • MySQL • REST APIs • Postman • S
 3. Update application.properties with your MySQL credentials
 4. Run ExpenceAndBudgetManagementApplication.java
 5. Test APIs on http://localhost:8080
+
+# Role-Based Access Control
+
+The system supports three user roles:
+
+| Role    | Create | Read | Update | Delete |
+|---------|--------|------|--------|--------|
+| ADMIN   | ✅     | ✅   | ✅     | ✅     |
+| ANALYST | ✅     | ✅   | ✅     | ❌     |
+| VIEWER  | ❌     | ✅   | ❌     | ❌     |
+
+Every API request (except user creation) requires an X-User-Id header.
+The system checks the user's role and blocks unauthorized actions automatically.
+
+## Dashboard Summary API
+
+GET /api/expenses/user/{userId}/dashboard
+
+Returns:
+- Total income (sum of all budgets)
+- Total expenses
+- Net balance
+- Category-wise expense totals
+- Total number of records

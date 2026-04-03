@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.budgetmanagement.DTO.DashboardSummaryDTO;
 import com.budgetmanagement.entity.Expense;
 import com.budgetmanagement.service.ExpenseService;
 
@@ -62,5 +63,10 @@ public class ExpenseController {
 	public ResponseEntity<String> deleteExpense(@PathVariable Long id) {
 		expenseService.deleteExpense(id);
 		return ResponseEntity.ok("Expense deleted successfully");
+	}
+	@GetMapping("/user/{userId}/dashboard")
+	public ResponseEntity<DashboardSummaryDTO> getDashboardSummary(
+	        @PathVariable Long userId) {
+	    return ResponseEntity.ok(expenseService.getDashboardSummary(userId));
 	}
 }

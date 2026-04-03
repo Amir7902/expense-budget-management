@@ -1,5 +1,6 @@
 package com.budgetmanagement.service;
 
+import com.budgetmanagement.DTO.DashboardSummaryDTO;
 import com.budgetmanagement.entity.Budget;
 import com.budgetmanagement.entity.Category;
 import com.budgetmanagement.entity.Expense;
@@ -70,7 +71,7 @@ public class ExpenseService {
 		expenseRepository.deleteById(id);
 	}
 
-	// --- Core finance logic: budget vs actual variance + overspending alert ---
+	
 	public Map<String, Object> getBudgetVsActual(Long userId, Long categoryId, LocalDate startDate, LocalDate endDate) {
 		BigDecimal totalExpense = expenseRepository.getTotalExpenseByUserAndCategoryAndDateRange(userId, categoryId,
 				startDate, endDate);
@@ -100,5 +101,43 @@ public class ExpenseService {
 		}
 
 		return result;
+	}
+	
+	public DashboardSummaryDTO getDashboardSummary(Long userId) {
+
+	   
+	    BigDecimal totalExpenses = expenseRepository
+	            .getTotalExpensesByUser(userId);
+	    if (totalExpenses == null) totalExpenses = BigDecimal.ZERO;
+
+	    //with this we can have totals Category wise
+	    List<Object[]> categoryData = expenseRepository
+	            .getCategoryWiseTotals(userId);
+	    Map<String, BigDecimal> categoryWiseTotals = new HashMap<>();
+	    for (Object[] row : categoryData) {
+	        String categoryName = (String) row[0];
+	        BigDecimal total = (BigDecimal) row[1];
+	        categoryWiseTotals.put(categoryName, total);
+	    }
+
+	    // Get all budgets to calculate total income (budget amounts)
+	    List<Budget> budgets = budgetRepository.findByUserId(userId);
+	    BigDecimal totalIncome = budgets.stream()
+	            .map(Budget::getBudgetAmount)
+	            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+	    // For Net balance
+	    BigDecimal netBalance = totalIncome.subtract(totalExpenses);
+
+	    // For Total records
+	    long totalRecords = expenseRepository.findByUserId(userId).size();
+
+	    return new DashboardSummaryDTO(
+	            totalIncome,
+	            totalExpenses,
+	            netBalance,
+	            categoryWiseTotals,
+	            totalRecords
+	    );
 	}
 }

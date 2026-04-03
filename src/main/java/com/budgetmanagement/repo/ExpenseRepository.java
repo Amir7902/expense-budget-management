@@ -25,4 +25,11 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 	BigDecimal getTotalExpenseByUserAndCategoryAndDateRange(@Param("userId") Long userId,
 			@Param("categoryId") Long categoryId, @Param("startDate") LocalDate startDate,
 			@Param("endDate") LocalDate endDate);
+
+	@Query("SELECT SUM(e.amount) FROM Expense e WHERE e.user.id = :userId")
+	BigDecimal getTotalExpensesByUser(@Param("userId") Long userId);
+
+	@Query("SELECT e.category.name, SUM(e.amount) FROM Expense e "
+			+ "WHERE e.user.id = :userId GROUP BY e.category.name")
+	List<Object[]> getCategoryWiseTotals(@Param("userId") Long userId);
 }
